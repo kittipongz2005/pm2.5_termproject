@@ -1,0 +1,6 @@
+pip install dash
+pip install pandas
+pip install ipython
+pip install pycaret
+pip install dash requests
+pip install dash-leaflet
