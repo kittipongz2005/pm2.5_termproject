@@ -1,64 +1,8 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    padding: 20px;
-    background-image: url('../image/background.jpg');
-    /* Add background image */
-    background-size: cover;
-    /* Ensure the background covers the entire area */
-    background-position: center;
-    /* Center the background image */
-    background-attachment: fixed;
-    /* Ensure the background image stays fixed in place */
-}
-
 h1 {
-    color: #333;
+    color: red;
     text-align: center;
 }
 
-#pm25-graph {
-    width: 80%;
-    margin: 0 auto;
-}
-
-/* เพิ่มสไตล์ใหม่ */
-body.centered {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
-    flex-direction: column;
-    /* Ensure content is stacked vertically */
-    background-image: url('../image/background.jpg');
-    /* Add background image */
-    background-size: cover;
-    /* Ensure the background covers the entire area */
-    background-position: center;
-    /* Center the background image */
-    background-attachment: fixed;
-    /* Ensure the background image stays fixed in place */
-}
-
-body.centered .container {
-    text-align: center;
-    width: 100%;
-    /* Ensure container takes full width */
-}
-
-.container {
-    text-align: center;
-}
-
-button {
-    padding: 15px 30px;
+p {
     font-size: 20px;
-    cursor: pointer;
-}
-
-.start-button {
-    margin: 10px;
-    /* Add margin to buttons */
 }

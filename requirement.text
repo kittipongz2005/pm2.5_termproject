@@ -1,6 +1,2 @@
-pip install dash
-pip install pandas
-pip install ipython
-pip install pycaret
-pip install dash requests
-pip install dash-leaflet
+pip install dash pandas matplotlib pycaret
+pip install joblib
