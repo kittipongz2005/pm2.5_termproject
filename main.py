@@ -66,6 +66,7 @@ def assign_color_and_size_humidity(row):
 
 # สร้างแอปพลิเคชัน Dash
 app = dash.Dash(__name__)
+app.title = "Air Quality Insights"  # เปลี่ยนชื่อแอปพลิเคชัน
 
 # สร้าง CSS สำหรับแถบสี PM2.5
 color_scale_pm25 = html.Div(
@@ -237,11 +238,11 @@ app.layout = html.Div(
                     [
                         (
                             html.Img(
-                                src="/assets/air4thai_logo.png",
+                                src="/assets/logo.png",
                                 style={"height": "40px"},
                             )
-                            if os.path.exists("assets/air4thai_logo.png")
-                            else html.H3("Air4Thai")
+                            if os.path.exists("assets/logo.png")
+                            else html.H3("Air Quality Insights")
                         )
                     ],
                     style={"display": "flex", "alignItems": "center"},
@@ -250,32 +251,32 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.A(
-                            "หน้าหลัก",
+                            "Home",
                             className="menu-item",
                             style={"margin": "0 15px", "color": "#0078d7"},
                         ),
                         html.A(
-                            "รายงาน",
+                            "Reports",
                             className="menu-item",
                             style={"margin": "0 15px", "color": "#0078d7"},
                         ),
                         html.A(
-                            "ข้อมูลย้อนหลัง",
+                            "Historical Data",
                             className="menu-item",
                             style={"margin": "0 15px", "color": "#0078d7"},
                         ),
                         html.A(
-                            "เกี่ยวกับคุณภาพอากาศ",
+                            "About Air Quality",
                             className="menu-item",
                             style={"margin": "0 15px", "color": "#0078d7"},
                         ),
                         html.A(
-                            "ดาวน์โหลด",
+                            "Download",
                             className="menu-item",
                             style={"margin": "0 15px", "color": "#0078d7"},
                         ),
                         html.A(
-                            "ติดต่อเพิ่มเติม",
+                            "Contact Us",
                             className="menu-item",
                             style={"margin": "0 15px", "color": "#0078d7"},
                         ),
@@ -284,11 +285,11 @@ app.layout = html.Div(
                             [
                                 (
                                     html.Img(
-                                        src="/assets/th_flag.png",
+                                        src="/assets/en_flag.png",
                                         style={"height": "20px", "marginRight": "5px"},
                                     )
-                                    if os.path.exists("assets/th_flag.png")
-                                    else html.Span("TH", style={"fontWeight": "bold"})
+                                    if os.path.exists("assets/en_flag.png")
+                                    else html.Span("EN", style={"fontWeight": "bold"})
                                 )
                             ],
                             style={
@@ -308,7 +309,8 @@ app.layout = html.Div(
                 "justifyContent": "space-between",
                 "padding": "10px 20px",
                 "borderBottom": "1px solid #ddd",
-                "backgroundColor": "white",
+                "backgroundColor": "#f8f9fa",
+                "boxShadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
             },
         ),
         html.Div(
@@ -342,8 +344,8 @@ app.layout = html.Div(
                     id="data-type-dropdown",
                     options=[
                         {"label": "PM2.5", "value": "PM2.5"},
-                        {"label": "อุณหภูมิ", "value": "Temp"},
-                        {"label": "ความชื้น", "value": "Humidity"},
+                        {"label": "Temperature", "value": "Temp"},
+                        {"label": "Humidity", "value": "Humidity"},
                     ],
                     value="PM2.5",
                     labelStyle={
@@ -360,10 +362,10 @@ app.layout = html.Div(
         html.Div(id="city-info", style={"width": "80%", "margin": "auto"}),
     ],
     style={
-        "fontFamily": "Thonburi, Arial, sans-serif",
+        "fontFamily": "Arial, sans-serif",
         "margin": "0",
         "padding": "0",
-        "backgroundColor": "#f5f5f5",
+        "backgroundColor": "#e9ecef",
     },
 )
 
@@ -396,18 +398,18 @@ def update_map_and_info(data_type, clickData):
     # เลือก DataFrame และฟังก์ชันกำหนดสีตามประเภทข้อมูล
     if data_type == "PM2.5":
         df = pm25_df
-        y_label = "ค่า PM2.5 (μg/m³)"
-        title_header = "ค่าฝุ่น PM2.5"
+        y_label = "PM2.5 Value (μg/m³)"
+        title_header = "PM2.5 Levels"
         color_assign_func = assign_color_and_size_pm25
     elif data_type == "Temp":
         df = temperature_df
-        y_label = "อุณหภูมิ (°C)"
-        title_header = "อุณหภูมิ"
+        y_label = "Temperature (°C)"
+        title_header = "Temperature"
         color_assign_func = assign_color_and_size_temp
     elif data_type == "Humidity":
         df = humidity_df
-        y_label = "ความชื้น (%)"
-        title_header = "ความชื้นสัมพัทธ์"
+        y_label = "Humidity (%)"
+        title_header = "Humidity Levels"
         color_assign_func = assign_color_and_size_humidity
 
     # อัปเดตค่าสีและขนาดตามข้อมูลที่เลือก
@@ -461,22 +463,22 @@ def update_map_and_info(data_type, clickData):
             # สร้าง DataFrame ใหม่เพื่อนำไปพล็อตกราฟ
             plot_data = pd.DataFrame(
                 {
-                    "วันที่": date_columns,
-                    "ค่า": city_data[date_columns].values.flatten().tolist(),
+                    "Date": date_columns,
+                    "Value": city_data[date_columns].values.flatten().tolist(),
                 }
             )
 
             # สร้างกราฟเส้น
             fig = px.line(
                 plot_data,
-                x="วันที่",
-                y="ค่า",
-                title=f"{title_header}ใน{city}",
-                labels={"วันที่": "วันที่", "ค่า": y_label},
+                x="Date",
+                y="Value",
+                title=f"{title_header} in {city}",
+                labels={"Date": "Date", "Value": y_label},
             )
             fig.update_traces(mode="lines+markers")
             fig.update_layout(
-                xaxis_title="วันที่",
+                xaxis_title="Date",
                 yaxis_title=y_label,
                 template="plotly_white",
                 margin={"r": 20, "t": 40, "l": 20, "b": 20},
@@ -485,7 +487,7 @@ def update_map_and_info(data_type, clickData):
             return updated_map, html.Div(
                 [
                     html.H3(
-                        f"เมือง: {city}", style={"marginTop": "20px", "color": "#333"}
+                        f"City: {city}", style={"marginTop": "20px", "color": "#333"}
                     ),
                     dcc.Graph(figure=fig),
                 ]
