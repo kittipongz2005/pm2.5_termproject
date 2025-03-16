@@ -15,7 +15,7 @@ forecast.index = forecast.index.to_period("D")
 predictions = predict_model(model, X=forecast)
 
 
-def predict_pm25_arima_001_7days(days_to_forecast):
+def predict_pm25_arima_018(days_to_forecast):
     """
     ทำการพยากรณ์ PM2.5 จากโมเดลที่โหลดไว้
     โดยดึงข้อมูลจากตัวแปร predictions และทำนายตามจำนวนวันที่เลือก
