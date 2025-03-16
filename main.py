@@ -10,7 +10,6 @@ data_folder = "data"
 # อ่านไฟล์ CSV จากโฟลเดอร์ data
 pm25_df = pd.read_csv(os.path.join(data_folder, "pm25_data.csv"))
 temperature_df = pd.read_csv(os.path.join(data_folder, "temperature_data.csv"))
-humidity_df = pd.read_csv(os.path.join(data_folder, "humidity_data.csv"))
 
 
 # เพิ่มคอลัมน์สีและขนาดสำหรับการแสดงผลบนแผนที่
@@ -45,23 +44,6 @@ def assign_color_and_size_temp(row):
         return "#ffa500", 14  # สีส้ม - ร้อน
     else:
         return "#ff0000", 16  # สีแดง - ร้อนมาก
-
-
-# เพิ่มฟังก์ชั่นสำหรับความชื้น
-def assign_color_and_size_humidity(row):
-    value = row["Value"]
-
-    # กำหนดสีตามระดับความชื้น
-    if value <= 30:
-        return "#ff0000", 16  # สีแดง - แห้งมาก
-    elif value <= 50:
-        return "#ffa500", 14  # สีส้ม - แห้ง
-    elif value <= 70:
-        return "#ffff00", 12  # สีเหลือง - ปานกลาง
-    elif value <= 85:
-        return "#7cfc00", 10  # สีเขียว - ชื้น
-    else:
-        return "#44cef6", 10  # สีฟ้า - ชื้นมาก
 
 
 # สร้างแอปพลิเคชัน Dash
@@ -147,46 +129,6 @@ color_scale_temp = html.Div(
     style={"display": "none"},
 )
 
-# สร้าง CSS สำหรับแถบสีความชื้น
-color_scale_humidity = html.Div(
-    [
-        html.Div(
-            style={
-                "display": "flex",
-                "margin": "10px auto",
-                "width": "80%",
-                "height": "20px",
-            },
-            children=[
-                html.Div(style={"backgroundColor": "#ff0000", "flex": "1"}),
-                html.Div(style={"backgroundColor": "#ffa500", "flex": "1"}),
-                html.Div(style={"backgroundColor": "#ffff00", "flex": "1"}),
-                html.Div(style={"backgroundColor": "#7cfc00", "flex": "1"}),
-                html.Div(style={"backgroundColor": "#44cef6", "flex": "1"}),
-            ],
-        ),
-        html.Div(
-            style={
-                "display": "flex",
-                "justifyContent": "space-between",
-                "width": "80%",
-                "margin": "0 auto",
-                "color": "#333",
-                "fontWeight": "bold",
-            },
-            children=[
-                html.Div("แห้งมาก (≤30%)"),
-                html.Div("แห้ง (≤50%)"),
-                html.Div("ปานกลาง (≤70%)"),
-                html.Div("ชื้น (≤85%)"),
-                html.Div("ชื้นมาก (>85%)"),
-            ],
-        ),
-    ],
-    id="color-scale-humidity",
-    style={"display": "none"},
-)
-
 # เพิ่มคอลัมน์สีและขนาดใน DataFrame สำหรับการแสดงผลครั้งแรก
 pm25_df["Value"] = pm25_df["Date1"]  # ใช้ค่าล่าสุดเป็นตัวกำหนดสี
 pm25_df["Color"], pm25_df["Size"] = zip(
@@ -197,12 +139,6 @@ pm25_df["Color"], pm25_df["Size"] = zip(
 temperature_df["Value"] = temperature_df["Date1"]
 temperature_df["Color"], temperature_df["Size"] = zip(
     *temperature_df.apply(assign_color_and_size_temp, axis=1)
-)
-
-# เพิ่มคอลัมน์สีและขนาดใน DataFrame ความชื้น
-humidity_df["Value"] = humidity_df["Date1"]
-humidity_df["Color"], humidity_df["Size"] = zip(
-    *humidity_df.apply(assign_color_and_size_humidity, axis=1)
 )
 
 # สร้างแผนที่แบบ scattermapbox ด้วย Plotly สำหรับ PM2.5 (เริ่มต้น)
@@ -324,19 +260,24 @@ app.layout = html.Div(
                     figure=map_fig,
                     config={"scrollZoom": True},
                     style={
-                        "width": "100%",
+                        "width": "70%",
                         "height": "70vh",
                         "border": "1px solid #ddd",
+                        "border": "3px solid black",
                         "borderRadius": "5px",
                     },
                 ),
             ],
-            style={"padding": "0 20px", "marginBottom": "15px"},
+            style={
+                "padding": "0 20px",
+                "marginBottom": "15px",
+                "display": "flex",
+                "justifyContent": "center",  # จัดให้อยู่ตรงกลาง
+            },
         ),
         # ส่วนแถบสีทั้งหมด (สร้างตัวแปร)
         color_scale_pm25,
         color_scale_temp,
-        color_scale_humidity,
         # ส่วนเลือกประเภทข้อมูล
         html.Div(
             [
@@ -345,7 +286,6 @@ app.layout = html.Div(
                     options=[
                         {"label": "PM2.5", "value": "PM2.5"},
                         {"label": "Temperature", "value": "Temp"},
-                        {"label": "Humidity", "value": "Humidity"},
                     ],
                     value="PM2.5",
                     labelStyle={
@@ -375,18 +315,13 @@ app.layout = html.Div(
     [
         Output("color-scale-pm25", "style"),
         Output("color-scale-temp", "style"),
-        Output("color-scale-humidity", "style"),
     ],
     [Input("data-type-dropdown", "value")],
 )
 def toggle_color_scale(data_type):
     pm25_style = {"display": "block"} if data_type == "PM2.5" else {"display": "none"}
     temp_style = {"display": "block"} if data_type == "Temp" else {"display": "none"}
-    humidity_style = (
-        {"display": "block"} if data_type == "Humidity" else {"display": "none"}
-    )
-
-    return pm25_style, temp_style, humidity_style
+    return pm25_style, temp_style
 
 
 # Callback เพื่ออัปเดตข้อมูลเมืองและกราฟตามประเภทที่เลือก
@@ -406,11 +341,6 @@ def update_map_and_info(data_type, clickData):
         y_label = "Temperature (°C)"
         title_header = "Temperature"
         color_assign_func = assign_color_and_size_temp
-    elif data_type == "Humidity":
-        df = humidity_df
-        y_label = "Humidity (%)"
-        title_header = "Humidity Levels"
-        color_assign_func = assign_color_and_size_humidity
 
     # อัปเดตค่าสีและขนาดตามข้อมูลที่เลือก
     df["Value"] = df["Date1"]  # ใช้ค่าล่าสุดเป็นตัวกำหนดสี
@@ -484,16 +414,129 @@ def update_map_and_info(data_type, clickData):
                 margin={"r": 20, "t": 40, "l": 20, "b": 20},
             )
 
+            # สร้างตารางข้อมูลแต่ละวันในรูปแบบคล้ายพยากรณ์อากาศ
+            # สร้างวันที่แบบไทย
+            thai_days = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."]
+
+            # สร้าง weather card container
+            weather_cards = html.Div(
+                [
+                    html.Div(
+                        [
+                            # สร้าง weather card สำหรับแต่ละวัน
+                            html.Div(
+                                [
+                                    html.Div(
+                                        thai_days[i % 7], style={"fontWeight": "bold"}
+                                    ),
+                                    # เพิ่มไอคอนตามความเหมาะสม
+                                    html.Div(
+                                        html.Div(
+                                            style={
+                                                "width": "50px",
+                                                "height": "50px",
+                                                "borderRadius": "50%",
+                                                "backgroundColor": (
+                                                    assign_color_and_size_pm25(
+                                                        {
+                                                            "Value": city_data[
+                                                                col
+                                                            ].values[0]
+                                                        }
+                                                    )[0]
+                                                    if data_type == "PM2.5"
+                                                    else assign_color_and_size_temp(
+                                                        {
+                                                            "Value": city_data[
+                                                                col
+                                                            ].values[0]
+                                                        }
+                                                    )[0]
+                                                ),
+                                                "margin": "10px auto",
+                                            }
+                                        ),
+                                    ),
+                                    # แสดงค่าที่เหมาะสมตามประเภทข้อมูล
+                                    html.Div(
+                                        [
+                                            html.Span(
+                                                (
+                                                    f"{round(city_data[col].values[0])}°"
+                                                    if data_type == "Temp"
+                                                    else f"{round(city_data[col].values[0])} μg/m³"
+                                                ),
+                                                style={
+                                                    "fontWeight": "bold",
+                                                    "fontSize": "20px",
+                                                },
+                                            ),
+                                            html.Span(" "),
+                                            # แสดงค่าที่เหมาะสมตามประเภทข้อมูล (ถ้ามี)
+                                            html.Span(
+                                                get_secondary_value(
+                                                    city_data, col, data_type
+                                                ),
+                                                style={
+                                                    "color": "#777",
+                                                    "fontSize": "16px",
+                                                },
+                                            ),
+                                        ]
+                                    ),
+                                ],
+                                style={
+                                    "backgroundColor": "#f8f9fa",
+                                    "borderRadius": "8px",
+                                    "padding": "15px",
+                                    "margin": "5px",
+                                    "boxShadow": "0 2px 4px rgba(0,0,0,0.1)",
+                                    "width": "100px",
+                                    "textAlign": "center",
+                                },
+                            )
+                            for i, col in enumerate(date_columns)
+                        ],
+                        style={
+                            "display": "flex",
+                            "justifyContent": "center",
+                            "flexWrap": "wrap",
+                            "margin": "20px 0",
+                        },
+                    )
+                ]
+            )
+
             return updated_map, html.Div(
                 [
                     html.H3(
                         f"City: {city}", style={"marginTop": "20px", "color": "#333"}
                     ),
                     dcc.Graph(figure=fig),
+                    html.H4(
+                        "Daily Data",
+                        style={
+                            "marginTop": "20px",
+                            "color": "#333",
+                            "textAlign": "center",
+                        },
+                    ),
+                    weather_cards,
                 ]
             )
 
     return updated_map, city_info
+
+
+def get_secondary_value(city_data, col, data_type):
+    """สร้างค่าที่สอง (ถ้ามี) สำหรับแสดงในการ์ดพยากรณ์"""
+    # กรณีอุณหภูมิ แสดงค่าต่ำสุด (สมมติว่าหาได้จากการลบ 5-10 องศา)
+    if data_type == "Temp":
+        high_temp = city_data[col].values[0]
+        low_temp = max(high_temp - 8, 0)  # ลดลง 8 องศา แต่ไม่ต่ำกว่า 0
+        return f"{round(low_temp)}°"
+    else:
+        return ""  # ไม่แสดงค่าที่สองสำหรับข้อมูลอื่น
 
 
 if __name__ == "__main__":

@@ -1,2 +1,3 @@
 pip install dash pandas matplotlib pycaret
 pip install joblib
+pip install dash-bootstrap-components
