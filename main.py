@@ -223,8 +223,8 @@ locations = [
         "temperature_model": predict_temperature_arima_014,
     },
     {
-        "lat": 7.007325789671034,
-        "lon": 100.10430553665726,
+        "lat": 7.007332752042238,
+        "lon": 100.50226904986873,
         "city": "R202",
         "model": predict_pm25_arima_test_wifi,
         "temperature_model": predict_temperature_arima_test_wifi,
@@ -284,6 +284,7 @@ def update_map_and_graph(click_data, data_type):
         height=500,
     )
 
+    # ในส่วนของ Callback ที่สร้าง Weather Cards
     if click_data:
         lat = click_data["points"][0]["lat"]
         lon = click_data["points"][0]["lon"]
@@ -342,8 +343,41 @@ def update_map_and_graph(click_data, data_type):
             color_scale_pm25_style = {"display": "none"}
             color_scale_temperature_style = {"display": "block"}
 
-        # สร้าง Weather Cards
-        thai_days = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."]
+        # ดึงค่าสุดท้ายจาก predicted_values
+        last_value = predicted_values[-1]
+
+        # กำหนดสีของจุดบนแผนที่ตามค่าสุดท้าย
+        if data_type == "pm25":
+            map_df.loc[map_df["city"] == city, "Color"], _ = assign_color_and_size_pm25(
+                {"Value": last_value}
+            )
+        else:
+            map_df.loc[map_df["city"] == city, "Color"], _ = (
+                assign_color_and_size_temperature({"Value": last_value})
+            )
+
+        # พิมพ์ค่าที่พยากรณ์ได้และค่าสุดท้าย
+        print("Predicted Values:", predicted_values)
+        print("Last Value:", last_value)
+
+        # พิมพ์ค่าสีที่กำหนดให้จุดบนแผนที่
+        print("Map DF Colors for Selected City:")
+        print(map_df.loc[map_df["city"] == city, ["city", "Value", "Color"]])
+
+        # สร้างแผนที่ใหม่ด้วยสีที่อัปเดต
+        map_fig = px.scatter_mapbox(
+            map_df,
+            lat="lat",
+            lon="lon",
+            hover_name="city",
+            color="Color",
+            size="Size",
+            size_max=15,
+            zoom=5,
+            height=500,
+        )
+
+        # สร้าง Weather Cards โดยใช้วันที่จาก future_dates
         weather_cards = html.Div(
             [
                 html.Div(
@@ -351,7 +385,10 @@ def update_map_and_graph(click_data, data_type):
                         html.Div(
                             [
                                 html.Div(
-                                    thai_days[i % 7], style={"fontWeight": "bold"}
+                                    future_dates[i].strftime(
+                                        "%d/%m/%Y"
+                                    ),  # แสดงวันที่ในรูปแบบที่ต้องการ
+                                    style={"fontWeight": "bold"},
                                 ),
                                 html.Div(
                                     html.Div(
